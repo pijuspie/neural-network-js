@@ -1,2 +1,4 @@
 # neural-network-js
-A neural network in JavaScript
+A neural network from scratch in JavaScript.
+
+
