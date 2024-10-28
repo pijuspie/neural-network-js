@@ -1,4 +1,4 @@
-# neural-network-js
+# Neural Network in JavaScript
 
 This is a neural network implementation from scratch in JavaScript. Without any libraries.
 The neural network implementation is in [src folder](src/).
