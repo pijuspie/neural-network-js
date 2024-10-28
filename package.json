@@ -2,10 +2,9 @@
   "name": "neural-network-js",
   "version": "1.0.0",
   "description": "",
-  "main": "main.js",
+  "main": "src/neural.js",
   "scripts": {
-    "build": "node main.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "digits": "node digits/main.js"
   },
   "type": "module",
   "keywords": [],
