@@ -82,6 +82,44 @@ class NeuralNetwork {
         return loss;
     }
 
+    trainBatch(batch, learningRate = 1) {
+        const weights = [];
+        const biases = [];
+
+        for (let i = 0; i < this.layers.length - 1; i++) {
+            const wi = new Matrix(this.layers[i + 1], this.layers[i]).map(() => 0);
+            const bi = new Matrix(this.layers[i + 1], 1).map(() => 0);
+            weights.push(wi);
+            biases.push(bi);
+        }
+
+        batch.forEach(({ inputs, targets }) => {
+            if (inputs.length !== this.layers[0]) {
+                throw new Error("Input length does not match.");
+            }
+
+            if (targets.length !== this.layers[this.layers.length - 1]) {
+                throw new Error("Output length does not match.");
+            }
+
+            this.feedForward(inputs);
+            const error = this.outputs[this.outputs.length - 1].map((x, row) => 2 * (x - targets[row]));
+
+            const gradients = this.backpropagate(error);
+            for (let i = 0; i < this.weights.length; i++) {
+                biases[i] = biases[i].map((x, row) => x - gradients[i].data[row][0] * learningRate);
+                weights[i] = weights[i].map((x, wr, wc) => {
+                    return x - gradients[i].data[wr][0] * this.outputs[i].data[wc][0] * learningRate;
+                });
+            }
+        });
+
+        for (let i = 0; i < this.weights.length; i++) {
+            this.biases[i] = this.biases[i].map((x, row) => x + biases[i].data[row][0] / batch.length);
+            this.weights[i] = this.weights[i].map((x, wr, wc) => x + weights[i].data[wr][wc] / batch.length);
+        }
+    }
+
     backpropagate(error) {
         const gradients = [];
         let currentError = error;

@@ -1,27 +1,28 @@
 import NeuralNetwork from "../src/neural.js";
 import { readFileSync, writeFileSync } from "fs";
 
-const directory = "digits/";
-const trainingLength = 60000;
-const trainingDataBuffer = readFileSync(directory + "train-images.idx3-ubyte");
-const trainingLabelBuffer = readFileSync(directory + "train-labels.idx1-ubyte");
-const testingLength = 10000;
-const testingDataBuffer = readFileSync(directory + "t10k-images.idx3-ubyte");
-const testingLabelBuffer = readFileSync(directory + "t10k-labels.idx1-ubyte");
+const directory = "symbols/";
+const dataLength = 442450;
+const dataBuffer = readFileSync(directory + "numbers_and_letters.dataset");
 
-function getData(image, testing = false) {
-    let dataBuffer = trainingDataBuffer, labelBuffer = trainingLabelBuffer;
-    if (testing) {
-        dataBuffer = testingDataBuffer;
-        labelBuffer = testingLabelBuffer;
-    }
+const frequency = [
+    6896, 7862, 6979, 7135, 6818,
+    6306, 6865, 7283, 6817, 6951,
+    13858, 8661, 23395, 10125, 11435,
+    1160, 5759, 7208, 1119, 8488,
+    5601, 11572, 12323, 18996, 57769,
+    19318, 5807, 11557, 48356, 22470,
+    28978, 4180, 10767, 6265, 10850,
+    6072
+];
 
-    const pixels = dataBuffer.subarray(15 + 784 * image, 15 + 784 * (image + 1));
+function getData(image) {
+    const pixels = dataBuffer.subarray(1 + 785 * image, 785 * (image + 1));
 
     const inputs = [];
     pixels.forEach(x => inputs.push(x / 255));
 
-    const target = labelBuffer[image + 8];
+    const target = dataBuffer[image * 785];
     return { inputs, target };
 }
 
@@ -33,24 +34,26 @@ function shuffle(array) {
 }
 
 function train(nn) {
-    const indexes = shuffle(Array.from(Array(trainingLength).keys()));
-    const learningRate = 10;
-    const batchSize = 1000;
+    const indexes = shuffle(Array.from(Array(dataLength).keys()));
+    const learningRate = 0.1;
+    const epochs = dataLength;
+    const batchSize = 100;
 
-    for (let i = 0; i < 8000; i += batchSize) {
+    for (let i = 0; i < epochs; i += batchSize) {
         const batch = [];
         for (let j = 0; j < batchSize; j++) {
             const data = getData(indexes[i + j]);
             const targets = [];
-            for (let i = 0; i < 10; i++) {
+            for (let i = 0; i < 36; i++) {
                 targets.push(data.target === i ? 1 : 0);
             }
             batch.push({ inputs: data.inputs, targets });
         }
 
         nn.trainBatch(batch, learningRate);
+
         if (i % 1000 === 0) {
-            const progress = i / trainingLength * 100;
+            const progress = i / epochs * 100;
             const rounded = Math.round(progress * 100) / 100;
             console.log(`${rounded.toFixed(2)}%`);
         }
@@ -60,24 +63,29 @@ function train(nn) {
 }
 
 function test(nn) {
-    const indexes = shuffle(Array.from(Array(testingLength).keys()));
+    const indexes = shuffle(Array.from(Array(dataLength).keys()));
+    const epochs = dataLength;
     let mistakes = 0;
 
-    for (let i = 0; i < testingLength; i++) {
-        const test = getData(indexes[i], true);
+    for (let i = 0; i < epochs; i++) {
+        const test = getData(indexes[i]);
         const outputs = nn.feedForward(test.inputs);
 
         let answer = 0;
-        for (let j = 1; j < 10; j++) {
+        for (let j = 1; j < 36; j++) {
             if (outputs[j] > outputs[answer]) answer = j;
         }
 
         if (answer !== test.target) {
             mistakes++;
         }
+
+        if (i % 1000 === 0) {
+            console.log(frequency);
+        }
     }
 
-    console.log(`${100 - mistakes / testingLength * 100}% accuracy`);
+    console.log(`${100 - mistakes / epochs * 100}% accuracy`);
 }
 
 function readBMP() {
@@ -120,6 +128,8 @@ function readBMP() {
 
 function input(nn) {
     const data = readBMP();
+    // const data = getData(22000).inputs;
+
     for (let i = 0; i < 28; i++) {
         const line = [];
         for (let j = 0; j < 28; j++) {
@@ -133,19 +143,32 @@ function input(nn) {
         console.log(`${i}: ${outputs[i] * 100}%`);
     }
 
+    for (let i = 0; i < 26; i++) {
+        const letter = String.fromCharCode("A".charCodeAt(0) + i);
+        console.log(`${letter}: ${outputs[i + 10] * 100}%`);
+    }
+
     let answer = 0;
-    for (let j = 1; j < 10; j++) {
+    for (let j = 1; j < 36; j++) {
         if (outputs[j] > outputs[answer]) answer = j;
     }
+
+    if (answer > 9) {
+        answer = String.fromCharCode("A".charCodeAt(0) + answer - 10);
+    }
+
     console.log(`Answer: ${answer}`);
 }
 
-// const nn = new NeuralNetwork([784, 150, 10]);
+
+// const nn = new NeuralNetwork([784, 200, 36]);
 const networkData = JSON.parse(readFileSync(directory + "network.json"));
 const nn = NeuralNetwork.import(networkData);
 
-for (let i = 0; i < 5; i++) {
-    train(nn);
-    test(nn);
-}
-// input(nn);
+// for (let i = 0; i < 5; i++) {
+//     train(nn);
+//     test(nn);
+// }
+
+// test(nn);
+input(nn);

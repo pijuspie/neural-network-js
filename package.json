@@ -4,7 +4,8 @@
   "description": "",
   "main": "src/neural.js",
   "scripts": {
-    "digits": "node digits/main.js"
+    "digits": "node digits/main.js",
+    "symbols": "node symbols/main.js"
   },
   "type": "module",
   "keywords": [],
