@@ -144,8 +144,9 @@ function input(nn) {
 const networkData = JSON.parse(readFileSync(directory + "network.json"));
 const nn = NeuralNetwork.import(networkData);
 
-for (let i = 0; i < 5; i++) {
-    train(nn);
-    test(nn);
-}
-// input(nn);
+// for (let i = 0; i < 5; i++) {
+//     train(nn);
+//     test(nn);
+// }
+// test(nn);
+input(nn);

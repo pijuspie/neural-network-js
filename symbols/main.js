@@ -64,7 +64,7 @@ function train(nn) {
 
 function test(nn) {
     const indexes = shuffle(Array.from(Array(dataLength).keys()));
-    const epochs = dataLength;
+    const epochs = 8000;
     let mistakes = 0;
 
     for (let i = 0; i < epochs; i++) {
@@ -78,10 +78,6 @@ function test(nn) {
 
         if (answer !== test.target) {
             mistakes++;
-        }
-
-        if (i % 1000 === 0) {
-            console.log(frequency);
         }
     }
 
