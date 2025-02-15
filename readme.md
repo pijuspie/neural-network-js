@@ -14,10 +14,6 @@ It's accuracy is 97.79%. It is trained using MNIST hand written digit dataset. T
 The neural network recognizes hand written numbers and letters from 28x28 pixel image.
 It's accuracy is 92.75%. The subproject is in [symbols folder](symbols/).
 
-## 3. Reinforcement learning
-
-Coming soon.
-
 ## License
 
 Copyright © 2024, pijuspie
